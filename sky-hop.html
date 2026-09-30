@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#dceef5"><title>Bubu &amp; Dudu: Sky Garden Hop</title>
+<link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/skyhop.css">
+</head>
+<body class="skyhop">
+<canvas id="world" aria-label="Sky Garden Hop 3D garden. WASD to move, Space to jump, Q to swap."></canvas>
+<header id="hud" class="sky-hud hidden">
+ <button id="character" class="secondary" title="Q or Tab to swap">🐼 Bubu ⇄ Q</button>
+ <span id="hearts">♥ 0</span><span id="level-name"></span><span id="timer">0:00</span>
+ <button id="pause" class="icon-button" aria-label="Pause">Ⅱ</button>
+</header>
+<div class="sound-bar"><button id="mute" class="icon-button" aria-label="Mute sound" aria-pressed="false">♫</button><label>Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="0.35"></label></div>
+<div id="toast" class="sky-toast hidden" role="status" aria-live="polite"></div>
+<div id="overlay" class="sky-overlay"><section class="card" id="panel" aria-label="Game menu"></section></div>
+<div id="touch" class="touch-controls hidden">
+ <div id="joystick" role="group" aria-label="Movement joystick"><span id="stick"></span></div>
+ <div class="touch-actions"><button id="touch-pound" class="secondary" aria-label="Ground pound">↓ Pound</button><button id="touch-swap" class="secondary">⇄ Swap</button><button id="touch-jump" class="primary">Jump ♡</button></div>
+</div>
+<div id="fade" aria-hidden="true"></div>
+<noscript>This garden needs JavaScript enabled.</noscript>
+<script src="vendor/three.min.js"></script>
+<script src="js/skyhop/main.js"></script>
+<script src="js/skyhop/audio.js"></script>
+<script src="js/skyhop/input.js"></script>
+<script src="js/skyhop/characters.js"></script>
+<script src="js/skyhop/levels.js"></script>
+<script src="js/skyhop/entities.js"></script>
+<script src="js/skyhop/physics.js"></script>
+<script src="js/skyhop/player.js"></script>
+<script src="js/skyhop/ui.js"></script>
+<script>window.SkyHop.boot();</script>
+</body></html>

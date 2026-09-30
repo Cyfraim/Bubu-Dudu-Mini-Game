@@ -1,0 +1,11 @@
+(function(S){'use strict';
+ const sphere=new THREE.SphereGeometry(1,16,12),disc=new THREE.CircleGeometry(1,16),materials={};
+ S.material=function(color){return materials[color]||(materials[color]=new THREE.MeshLambertMaterial({color}));};
+ S.character=function(kind,ghost){const root=new THREE.Group(),bodyColor=kind==='bubu'?'#fff6e6':'#c99a72',dark='#38303b';
+  function part(parent,color,pos,scale,geometry=sphere){const mesh=new THREE.Mesh(geometry,ghost?new THREE.MeshBasicMaterial({color:'#edb6cf',wireframe:true,transparent:true,opacity:.2,depthWrite:false}):S.material(color));mesh.position.set(...pos);mesh.scale.set(...scale);mesh.castShadow=!ghost;parent.add(mesh);return mesh;}
+  part(root,bodyColor,[0,.49,0],[.37,.43,.3]);const head=new THREE.Group();head.position.y=1.15;root.add(head);part(head,bodyColor,[0,0,0],[.65,.57,.5]);
+  for(const side of [-1,1]){part(head,kind==='bubu'?dark:bodyColor,[side*.46,.43,0],[.21,.22,.16]);if(kind==='dudu')part(head,'#ebc6a0',[side*.46,.43,.145],[.12,.13,.04]);part(root,kind==='bubu'?dark:bodyColor,[side*.4,.55,0],[.15,.24,.16]);part(root,kind==='bubu'?dark:bodyColor,[side*.23,.15,.1],[.22,.15,.25]);if(kind==='bubu'){const patch=part(head,dark,[side*.27,-.1,.43],[.18,.23,.065]);patch.rotation.z=side*-.25;}const eye=part(head,'#241e28',[side*.27,-.12,.493],[.047,.055,.028]);(root.userData.eyes||(root.userData.eyes=[])).push(eye);part(head,'#efa8b9',[side*.43,-.23,.445],[.09,.045,1],disc);}
+  if(kind==='dudu')part(head,'#edcba8',[0,-.24,.43],[.24,.17,.08]);part(head,dark,[0,-.2,.524],[.057,.04,.035]);root.userData.head=head;return root;
+ };
+ S.animateCharacter=function(mesh,time,velocity,grounded,impact,moving){const bounce=S.reduced?0:Math.sin(time*3)*.018;mesh.scale.set(1+impact*.22,1-impact*.28,1+impact*.15);mesh.position.y+=grounded?bounce:0;mesh.userData.head.rotation.z=moving?Math.sin(time*9)*.06:Math.sin(time*1.7)*.025;const blink=time%4.7>4.56;mesh.userData.eyes.forEach(eye=>eye.scale.y=blink?.009:.055);if(!grounded&&velocity>1)mesh.scale.set(.94,1.08,.94);};
+})(window.SkyHop);

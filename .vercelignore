@@ -1,0 +1,23 @@
+# Deploy only the site, not local configuration, secrets, or test artifacts.
+.git/
+.github/
+.vercel/
+.vscode/
+.idea/
+.env
+.env.*
+node_modules/
+tests/
+test-results/
+playwright-report/
+coverage/
+.cache/
+*.log
+README.md
+.gitignore
+.gitattributes
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Keep vendor/THREE-LICENSE.txt in the deployed site.

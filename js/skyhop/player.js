@@ -1,0 +1,18 @@
+(function(S){'use strict';S.player={kind:'bubu',pos:new THREE.Vector3(),vel:new THREE.Vector3(),grounded:false,support:null,coyote:0,buffer:0,jumps:0,pounding:false,impact:0,
+ create(){this.meshes={bubu:S.character('bubu'),dudu:S.character('dudu')};this.ghosts={bubu:S.character('bubu',true),dudu:S.character('dudu',true)};for(const m of Object.values(this.meshes).concat(Object.values(this.ghosts)))S.scene.add(m);this.blob=new THREE.Mesh(new THREE.CircleGeometry(.46,20),new THREE.MeshBasicMaterial({color:'#7c6c89',transparent:true,opacity:.18,depthWrite:false}));this.blob.rotation.x=-Math.PI/2;S.scene.add(this.blob);},
+ reset(spawn){this.pos.set(...spawn);this.vel.set(0,0,0);this.grounded=false;this.support=null;this.jumps=0;this.coyote=this.buffer=0;this.pounding=false;for(const g of Object.values(this.ghosts))g.visible=false;},
+ swap(){if(S.state.mode!=='playing')return;const old=this.kind;this.ghosts[old].position.copy(this.pos);this.ghosts[old].rotation.copy(this.meshes[old].rotation);this.ghosts[old].visible=true;this.kind=old==='bubu'?'dudu':'bubu';this.ghosts[this.kind].visible=false;this.pounding=false;S.sparkle(this.pos);S.audio.play('swap');S.ui.toast(this.kind==='bubu'?'Bubu ♡ Double jump & hold Jump to glide':'Dudu ♡ Push crates & Down + Jump to pound',2);},
+ update(dt){const c=S.CONFIG,input=S.input,axes=input.axes(),wasGrounded=this.grounded;
+  if(this.support&&this.support.active)this.pos.add(this.support.delta);
+  this.coyote=this.grounded?c.coyoteTime:Math.max(0,this.coyote-dt);this.buffer=Math.max(0,this.buffer-dt);if(input.jump){this.buffer=c.jumpBuffer;input.jump=false;}
+  if(this.grounded){this.jumps=0;this.pounding=false;}
+  if(this.buffer>0){if(this.kind==='dudu'&&!this.grounded&&this.coyote===0&&input.down()){this.pounding=true;this.vel.y=-c.groundPound;this.buffer=0;}else if(this.grounded||this.coyote>0||(this.kind==='bubu'&&this.jumps<2)){this.vel.y=this.kind==='bubu'?(this.jumps?c.doubleJump:c.bubuJump):c.jumpVelocity;this.jumps=this.coyote>0||this.grounded?1:this.jumps+1;this.grounded=false;this.coyote=0;this.buffer=0;S.audio.play('jump',this.kind);}}
+  const yaw=S.cameraYaw;this.vel.x=(Math.cos(yaw)*axes.x+Math.sin(yaw)*axes.y)*c.moveSpeed;this.vel.z=(-Math.sin(yaw)*axes.x+Math.cos(yaw)*axes.y)*c.moveSpeed;
+  // At yaw PI, forward is +Z; right is -X, matching the view from behind.
+  this.vel.y-=c.gravity*(this.kind==='dudu'?1.15:1)*dt;if(this.kind==='bubu'&&input.jumpHeld&&this.vel.y<0)this.vel.y=Math.max(this.vel.y,-c.glideFall);else this.vel.y=Math.max(this.vel.y,-(this.pounding?c.groundPound:c.duduFall));
+  S.physics.move(this,dt);S.physics.triggers(this);if(this.grounded&&!wasGrounded){this.impact=1;S.audio.play('land');this.pounding=false;}if(this.pos.y<c.fallZone)S.respawn();
+ },
+ animate(dt){this.impact=Math.max(0,this.impact-dt*5);const menu=S.state.mode==='menu';for(const kind of ['bubu','dudu']){const m=this.meshes[kind];m.visible=menu||kind===this.kind;m.position.copy(this.pos);if(menu){m.position.x+=kind==='bubu'?-.85:.85;m.rotation.y=Math.PI;}else if(this.vel.x*this.vel.x+this.vel.z*this.vel.z>.1)m.rotation.y=Math.atan2(this.vel.x,this.vel.z);S.animateCharacter(m,S.visualTime||0,this.vel.y,this.grounded,this.impact,Math.hypot(this.vel.x,this.vel.z)>.1);}
+  let top=-Infinity;for(const e of S.entities)if(e.solid&&e.active&&Math.abs(this.pos.x-e.pos.x)<e.size.x/2&&Math.abs(this.pos.z-e.pos.z)<e.size.z/2){const t=e.pos.y+e.size.y/2;if(t<=this.pos.y+.1)top=Math.max(top,t);}this.blob.visible=Number.isFinite(top);this.blob.position.set(this.pos.x,top+.025,this.pos.z);this.blob.material.opacity=Math.max(.035,.2-(this.pos.y-top)*.02);
+ }
+};})(window.SkyHop);

@@ -1,0 +1,31 @@
+# Local Vercel project/account settings
+.vercel/
+
+# Secrets (this static project does not require environment variables)
+.env
+.env.*
+!.env.example
+
+# Dependencies, caches, and generated build output
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+*.log
+
+# Generated browser-test artifacts; keep the test script tracked
+tests/*.png
+tests/*.webm
+test-results/
+playwright-report/
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~

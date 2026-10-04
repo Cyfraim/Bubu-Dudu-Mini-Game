@@ -9,7 +9,7 @@
   S.input.clear();S.loadLevel(index);Object.assign(S.state,{mode:'playing',level:index,time:0,deaths:0,hearts:0,honey:0,checkpoint:S.level.spawn.slice()});
   S.player.kind='bubu';S.player.reset(S.level.spawn);S.cameraYaw=Math.PI;S.cameraPitch=.48;S.ui.hide();S.ui.toast(S.level.hint,7);S.audio.unlock();
  };
- S.pause=function(){if(S.state.mode==='playing'){S.state.mode='paused';S.input.clear();S.ui.pause();}else if(S.state.mode==='paused'){S.state.mode='playing';S.ui.hide();}};
+ S.pause=function(){if(S.state.mode==='playing'){S.state.mode='paused';if(window.VoiceManager)VoiceManager.stop();S.input.clear();S.ui.pause();}else if(S.state.mode==='paused'){S.state.mode='playing';S.ui.hide();}};
  S.respawn=function(){if(S.state.mode!=='playing')return;S.state.deaths++;S.input.clear();S.player.reset(S.state.checkpoint);S.ui.fade();S.audio.play('respawn');S.ui.toast('A soft landing. Try again ♡');};
  S.complete=function(){if(S.state.mode!=='playing')return;S.state.mode='complete';S.input.clear();const key=S.state.level,old=S.best[key]||{};S.best[key]={time:Math.min(old.time||Infinity,S.state.time),hearts:Math.max(old.hearts||0,S.state.hearts)};try{localStorage.setItem('skyHopBest',JSON.stringify(S.best));}catch(e){}S.audio.play('complete');S.ui.summary();};
  S.boot=function(){

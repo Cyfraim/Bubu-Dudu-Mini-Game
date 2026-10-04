@@ -1,0 +1,23 @@
+'use strict';
+const assert=require('node:assert/strict');
+require('../js/kart/race.js');
+const K=globalThis.CozyKart,dt=K.CONFIG.step;
+let count=0;
+function test(name,fn){fn();count++;console.log('PASS '+name);}
+function race(index=0,random=()=>0){return K.createRace(K.tracks[index],400,'bubu',random);}
+function step(r,n,input={throttle:true}){for(let i=0;i<n;i++)K.update(r,dt,input);}
+function active(index=0){const r=race(index);r.mode='racing';r.hazards=[];r.boxes=[];r.pads=[];return r;}
+test('countdown freezes all racers and starts after three seconds',()=>{const r=race();step(r,350);assert.equal(r.time,0);assert.equal(r.racers[0].speed,0);step(r,12);assert.equal(r.mode,'racing');});
+test('throttle, coasting, brakes, and lane bounds',()=>{const r=active();step(r,240);const p=r.racers[0];assert(p.speed>20);step(r,60,{});assert(p.speed<23);step(r,150,{brake:true});assert.equal(p.speed,0);step(r,500,{throttle:true,steer:1});assert(p.lane<=6.8&&p.lane>=6);assert(p.speed<15);});
+test('charged drift boosts on release, short drift does not',()=>{const r=active(),p=r.racers[0];p.speed=23;p.lane=-2;step(r,170,{throttle:true,drift:true,steer:.2});assert(p.drift>=K.CONFIG.driftTime);step(r,1,{throttle:true});assert(p.boost>1);const a=active();a.racers[0].speed=23;step(a,20,{throttle:true,drift:true,steer:.2});step(a,1,{throttle:true});assert.equal(a.racers[0].boost,0);});
+test('full keyboard/touch steering can charge a drift before reaching grass',()=>{const r=active(),p=r.racers[0];p.speed=23;p.lane=0;step(r,150,{throttle:true,drift:true,steer:1});assert(p.drift>=K.CONFIG.driftTime);assert(p.lane<4.4);step(r,1,{throttle:true});assert(p.boost>1);});
+test('gift pickup has cooldown and only one held item',()=>{const r=active(),p=r.racers[0];r.boxes=[{s:0,lane:p.lane,cooldown:0}];step(r,1,{});assert.equal(p.item,'boost');assert(r.boxes[0].cooldown>5);p.item='shield';step(r,1,{});assert.equal(p.item,'shield');});
+test('all three gifts work and cannot be used while paused',()=>{const r=active(),p=r.racers[0];p.item='boost';assert(K.useItem(r,p));assert(p.boost>2);p.item='shield';K.useItem(r,p);assert.equal(p.shield,8);p.item='cookie';K.useItem(r,p);assert.equal(r.traps.length,1);assert.equal(r.traps[0].owner,0);r.mode='paused';p.item='boost';assert.equal(K.useItem(r,p),false);assert.equal(p.item,'boost');});
+test('shield blocks one hit; hit slows and has invulnerability',()=>{const r=active(),p=r.racers[0];p.speed=23;p.shield=8;assert.equal(K.hit(r,p),false);assert.equal(p.shield,0);assert.equal(p.speed,23);p.hitCooldown=0;assert(K.hit(r,p));assert(p.speed<12);assert.equal(K.hit(r,p),false);});
+test('cookie traps hit rivals, not their owner, and expire',()=>{const r=active(),p=r.racers[0];r.traps=[{s:0,lane:p.lane,owner:0,life:13}];step(r,1,{});assert.equal(p.stun,0);const other=r.racers[1];other.distance=0;other.lane=p.lane;other.speed=20;step(r,1,{});assert(other.stun>0);step(r,1,{});assert.equal(r.traps.length,0);});
+test('boost pads and honey hazards apply effects',()=>{const r=active(),p=r.racers[0];r.pads=[{s:0,lane:p.lane}];step(r,1,{});assert(p.boost>.7);r.pads=[];r.hazards=[{s:0,lane:p.lane}];p.speed=20;p.hitCooldown=0;step(r,1,{throttle:true});assert(p.stun>0);});
+test('laps cannot be awarded by lateral movement; finish needs three circuits',()=>{const r=active(),p=r.racers[0];p.distance=399;step(r,120,{steer:1});assert.equal(p.lap,1);p.lane=0;p.distance=400;p.speed=20;step(r,1,{throttle:true});assert.equal(p.lap,2);p.distance=1199.95;step(r,1,{throttle:true});assert.equal(r.mode,'complete');assert(p.finishTime!==null);assert.equal(p.distance,1200);});
+test('pause freezes countdown, positions, and timers',()=>{const r=active();step(r,30);r.mode='paused';const before=JSON.stringify(r);step(r,100);assert.equal(JSON.stringify(r),before);});
+test('AI finishes every track and rankings put finishers first',()=>{for(let index=0;index<3;index++){const r=active(index);step(r,120*90,{});assert(r.racers.slice(1).every(p=>p.finishTime!==null));assert.equal(K.ranking(r)[3].player,true);}});
+test('both characters, cyclic distance, restart defaults',()=>{const r=K.createRace(K.tracks[2],400,'dudu');assert.equal(r.racers[0].kind,'dudu');assert.equal(r.racers[1].kind,'bubu');assert.equal(K.gap(399,1,400),2);assert.equal(K.wrap(-1,400),399);assert.equal(r.time,0);assert.equal(r.mode,'countdown');});
+console.log('\n'+count+' racing-rule checks passed.');

@@ -11,7 +11,7 @@
  K.createRace=function(track,length,kind,random=Math.random){
   const racers=[{name:kind==='bubu'?'Bubu':'Dudu',kind,player:true,color:kind==='bubu'?'#ef91af':'#e5ad5f'},
    {name:kind==='bubu'?'Dudu':'Bubu',kind:kind==='bubu'?'dudu':'bubu',color:kind==='bubu'?'#e5ad5f':'#ef91af'},
-   {name:'Mint Buddy',kind:'bubu',color:'#83c8b3'},{name:'Berry Buddy',kind:'dudu',color:'#a59cd5'}];
+   {name:'Mint Buddy',kind:'mint',color:'#83c8b3'},{name:'Berry Buddy',kind:'berry',color:'#a59cd5'}];
   racers.forEach((r,i)=>Object.assign(r,{index:i,distance:-Math.floor(i/2)*3,speed:0,lane:i%2?1.7:-1.7,steer:0,drift:0,wasDrifting:false,boost:0,shield:0,stun:0,hitCooldown:0,item:null,finishTime:null,lap:1,aiTimer:2+i}));
   const boxes=[];for(const f of [.14,.38,.65,.85])for(const lane of [-2.8,0,2.8])boxes.push({s:length*f,lane,cooldown:0});
   const pads=[{s:length*.24,lane:-2.4},{s:length*.55,lane:2.4},{s:length*.92,lane:0}];

@@ -19,7 +19,9 @@
  const ghostMaterial=new THREE.MeshBasicMaterial({color:'#edb6cf',wireframe:true,transparent:true,opacity:.2,depthWrite:false});
  const styles={
   bubu:{fur:'#fffaf2',dark:'#49312b',ear:'#49312b',blush:'#eea0a8',inner:null},
-  dudu:{fur:'#c8906a',dark:'#57362a',ear:'#c8906a',blush:'#f3ce87',inner:'#88533d'}
+   dudu:{fur:'#c8906a',dark:'#57362a',ear:'#c8906a',blush:'#f3ce87',inner:'#88533d'},
+   mint:{fur:'#83c8b3',dark:'#304e49',ear:'#83c8b3',blush:'#f2b5bd',inner:'#508f80'},
+   berry:{fur:'#a59cd5',dark:'#443657',ear:'#a59cd5',blush:'#f2b5cf',inner:'#75679b'}
  };
  S.material=function(color){return materials[color]||(materials[color]=new THREE.MeshLambertMaterial({color}));};
  S.character=function(kind,ghost){

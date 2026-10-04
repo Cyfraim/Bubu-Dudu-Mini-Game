@@ -6,7 +6,8 @@
  K.makePath=function(track){
   const points=[],distances=[0],segments=720;let length=0;
   for(let i=0;i<=segments;i++){points.push(raw(track,i/segments));if(i){length+=points[i].distanceTo(points[i-1]);distances.push(length);}}
-  return {length,points,at(s,lane=0){s=K.wrap(s,length);let lo=0,hi=segments;while(lo+1<hi){const mid=(lo+hi)>>1;if(distances[mid]<=s)lo=mid;else hi=mid;}const f=(s-distances[lo])/(distances[lo+1]-distances[lo]);const center=points[lo].clone().lerp(points[lo+1],f),forward=points[lo+1].clone().sub(points[lo]).normalize(),right=new THREE.Vector3(forward.z,0,-forward.x).normalize();return {position:center.addScaledVector(right,lane),forward,right};}};
+   // Positive lanes point right when viewed by the camera following behind the kart.
+   return {length,points,at(s,lane=0){s=K.wrap(s,length);let lo=0,hi=segments;while(lo+1<hi){const mid=(lo+hi)>>1;if(distances[mid]<=s)lo=mid;else hi=mid;}const f=(s-distances[lo])/(distances[lo+1]-distances[lo]);const center=points[lo].clone().lerp(points[lo+1],f),forward=points[lo+1].clone().sub(points[lo]).normalize(),right=new THREE.Vector3(-forward.z,0,forward.x).normalize();return {position:center.addScaledVector(right,lane),forward,right};}};
  };
  function ribbon(path,width,color,height){const positions=[],indices=[],n=360;
   for(let i=0;i<=n;i++){for(const side of [-1,1]){const p=path.at(i/n*path.length,side*width/2).position;positions.push(p.x,p.y+height,p.z);}if(i<n){const v=i*2;indices.push(v,v+1,v+2,v+1,v+3,v+2);}}

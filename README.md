@@ -5,6 +5,7 @@
 Open `index.html` and select **Cozy Kart (3D)**, or double-click `cozy-kart.html`. The new mode uses the existing local Three.js r128 library and the existing Bubu/Dudu 3D bear models. No server, downloads, npm dependencies, or build step are needed. Deploy the new HTML, `css/kart.css`, and `js/kart/` alongside the existing files.
 
 - Choose Bubu or Dudu and race three AI buddies over three laps.
+- Mint Buddy and Berry Buddy have mint-green and lavender fur with matching karts; Bubu and Dudu retain their original colors.
 - Three original circuits: Sunny Garden Circuit, Honey Hill Raceway, and Moonlight Love Lane.
 - Assisted cornering follows the track centerline; steering moves the kart across the road, not freely around the world. Going onto the grass slows you down. Forward-only route distance ensures that cutting across the infield cannot skip laps.
 - WASD / arrows: accelerate, brake, and steer. Hold Space while steering at speed to charge a drift; release Space after the meter fills for a mini boost. E or the item button uses a held gift.
@@ -19,6 +20,7 @@ Open `index.html` and select **Cozy Kart (3D)**, or double-click `cozy-kart.html
 - `js/kart/models.js`: sampled track paths, procedural scenery, kart models, and animation. It reuses `js/skyhop/characters.js` without changing the existing Sky Hop game.
 - `js/kart/main.js`: menus, input, audio, camera, storage, and render loop.
 - `node tests/kart-rules.cjs`: dependency-free deterministic racing-rule checks.
+- `node tests/kart-models.cjs`: camera-relative left/right steering checks on all tracks and distinct opponent fur checks using the bundled Three.js.
 - `node tests/kart-browser.cjs`: browser checks with Chromium/Edge remote debugging on port 9222 and `cozy-kart.html` open. Uses Node 22+ and built-in WebSocket; no testing packages required.
 
 Physical-phone handling, subjective difficulty, audio quality, and sustained performance still need hands-on testing.

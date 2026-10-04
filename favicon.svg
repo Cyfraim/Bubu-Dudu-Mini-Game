@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Bubu and Dudu · Little Love Arcade</title>
+  <rect width="64" height="64" rx="16" fill="#f8dfe8"/>
+  <path d="M32 19C17 10 25 1 32 8C39 1 47 10 32 19Z" fill="#dd7997"/>
+  <g stroke="#49312b" stroke-width="2" stroke-linejoin="round">
+    <circle cx="10" cy="27" r="6" fill="#49312b"/>
+    <circle cx="29" cy="26" r="6" fill="#49312b"/>
+    <path d="M4 39C4 27 10 24 20 24C30 24 36 28 36 40C36 51 30 56 20 56C10 56 4 51 4 39Z" fill="#fffaf2"/>
+    <circle cx="36" cy="26" r="6" fill="#c8906a"/>
+    <circle cx="55" cy="27" r="6" fill="#c8906a"/>
+    <path d="M29 40C29 28 35 24 45 24C55 24 61 27 61 39C61 51 55 56 45 56C35 56 29 51 29 40Z" fill="#c8906a"/>
+  </g>
+  <g fill="#88533d">
+    <circle cx="36" cy="26" r="3"/>
+    <circle cx="55" cy="27" r="3"/>
+  </g>
+  <g fill="#49312b">
+    <circle cx="13" cy="38" r="2"/><circle cx="25" cy="38" r="2"/>
+    <circle cx="39" cy="38" r="2"/><circle cx="51" cy="38" r="2"/>
+  </g>
+  <g fill="#eea0a8">
+    <ellipse cx="9" cy="44" rx="3.5" ry="2.5"/>
+    <ellipse cx="27" cy="44" rx="3" ry="2.5"/>
+  </g>
+  <g fill="#f3ce87">
+    <ellipse cx="35" cy="44" rx="3" ry="2.5"/>
+    <ellipse cx="56" cy="44" rx="3.5" ry="2.5"/>
+  </g>
+  <g fill="none" stroke="#49312b" stroke-width="1.6" stroke-linecap="round">
+    <path d="M15 43Q17 47 19 43Q21 47 23 43"/>
+    <path d="M41 43Q43 47 45 43Q47 47 49 43"/>
+  </g>
+</svg>

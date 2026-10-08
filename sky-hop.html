@@ -4,9 +4,12 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#dceef5"><title>Bubu &amp; Dudu: Sky Garden Hop</title>
 <link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg">
-<link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/skyhop.css">
+<link rel="stylesheet" href="css/skyhop.css">
+<link rel="stylesheet" href="css/base.css">
+<script src="js/shared/settings.js"></script><script src="js/shared/modes.js"></script>
 </head>
-<body class="skyhop">
+<body class="skyhop product-game">
+<div id="product-loading" class="product-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading garden...</div>
 <canvas id="world" aria-label="Sky Garden Hop 3D garden. WASD to move, Space to jump, Q to swap."></canvas>
 <header id="hud" class="sky-hud hidden">
  <button id="character" class="secondary" title="Q or Tab to swap">🐼 Bubu ⇄ Q</button>
@@ -34,4 +37,5 @@
 <script src="js/skyhop/player.js"></script>
 <script src="js/skyhop/ui.js"></script>
 <script>window.SkyHop.boot();</script>
+<script src="js/shared/chrome.js"></script>
 </body></html>

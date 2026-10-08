@@ -1,0 +1,17 @@
+(function(D){'use strict';const U=D.ui={nodes:{},toastTime:0,flashTime:0,
+ init(){for(const id of ['dash','score','combo','lives','distance','lead','hug','toast','overlay','title','description','summary','play','menu','help','pause','mute','voices','volume','speed-lines'])this.nodes[id]=document.getElementById(id);const n=this.nodes;
+  n.play.addEventListener('click',function(){if(D.state.mode==='paused')D.pause();else D.start();});n.menu.addEventListener('click',D.menu);n.pause.addEventListener('click',D.pause);n.mute.addEventListener('click',function(){U.mute();});n.voices.addEventListener('click',function(){D.settings.voices=!D.settings.voices;D.audio.sync();D.save();U.sound();});n.volume.value=D.settings.volume;n.volume.addEventListener('input',function(){D.settings.volume=Number(n.volume.value);D.audio.sync();D.save();});D.audio.sync();this.sound();
+ },
+ mute(){D.settings.muted=!D.settings.muted;D.audio.sync();D.save();this.sound();},
+ sound(){const n=this.nodes;n.mute.textContent=D.settings.muted?'Sound off':'Sound on';n.mute.setAttribute('aria-pressed',String(D.settings.muted));n.voices.textContent=D.settings.voices?'Voices on':'Voices off';n.voices.setAttribute('aria-pressed',String(D.settings.voices));},
+ toast(text){this.nodes.toast.textContent=text;this.toastTime=3;},
+ flash(){this.flashTime=.2;},
+ mode(){const n=this.nodes,mode=D.state.mode;n.dash.dataset.mode=mode;n.overlay.hidden=mode==='playing';n.menu.hidden=mode==='menu';n.summary.hidden=mode!=='over';n.help.open=false;n.pause.disabled=mode==='menu'||mode==='over';
+  if(mode==='menu'){n.title.innerHTML='Lovely Lane <em>Dash</em>';n.description.innerHTML='Two best friends. One lovely adventure.<br>Gather hearts and take turns leading the way.';n.play.textContent='Let’s run ♡';}
+  else if(mode==='paused'){n.title.textContent='A little breather';n.description.textContent='Your garden adventure will wait for you.';n.play.textContent='Keep running ♡';}
+  else if(mode==='over'){n.title.textContent='Lovely run, you two!';n.description.textContent='Every little step is sweeter together.';n.play.textContent='Play Again ♡';n.summary.innerHTML='<div>Score<strong>'+Math.floor(D.state.score)+'</strong></div><div>Distance<strong>'+Math.floor(D.state.distance)+' m</strong></div><div>Hearts collected<strong>'+D.state.hearts+'</strong></div><div>Best score<strong>'+D.best+'</strong></div>';}
+  this.update(0);if(mode!=='playing')n.play.focus();
+ },
+ update(dt){const n=this.nodes,s=D.state,R=D.runner;n.score.textContent=Math.floor(s.score);n.combo.textContent='×'+s.combo;n.lives.textContent='♥'.repeat(Math.max(0,R.lives))+'♡'.repeat(D.CONFIG.lives-Math.max(0,R.lives));n.lives.setAttribute('aria-label',R.lives+' lives');n.distance.textContent=Math.floor(s.distance)+' m';n.lead.textContent=(R.kind==='bubu'?'🐼 Bubu':'🐻 Dudu')+' · Q / Tab to swap';n.hug.hidden=s.hug<=0;n.hug.textContent='♡ Hug Mode · '+s.hug.toFixed(1)+'s';if(s.mode==='playing'){this.toastTime=Math.max(0,this.toastTime-dt);this.flashTime=Math.max(0,this.flashTime-dt);}n.toast.style.opacity=this.toastTime>0?'1':'0';n.dash.style.boxShadow=this.flashTime>0?'inset 0 0 90px #f58ca8':'none';n['speed-lines'].style.opacity=!D.reduced&&s.mode==='playing'&&s.speed>20?'.15':'0';n.dash.style.background='linear-gradient(#'+D.track.sky.getHexString()+', #'+D.scene.fog.color.getHexString()+' 80%)';
+ }
+};})(window.Dash);

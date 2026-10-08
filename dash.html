@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+ <meta name="theme-color" content="#f8eee8">
+ <title>Lovely Lane Dash · Bubu &amp; Dudu</title>
+ <link rel="icon" href="favicon.svg" type="image/svg+xml">
+ <link rel="stylesheet" href="css/dash.css">
+<link rel="stylesheet" href="css/base.css">
+<script src="js/shared/settings.js"></script><script src="js/shared/modes.js"></script>
+</head>
+<body class="product-game">
+<div id="product-loading" class="product-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading garden...</div>
+ <main id="dash">
+  <canvas id="garden" tabindex="0" aria-label="Lovely Lane Dash. Three lanes: move left or right, jump, slide, and swap your lead."></canvas>
+  <div id="speed-lines" aria-hidden="true"></div>
+  <header id="hud">
+   <div><small>LOVE POINTS</small><strong id="score">0</strong></div>
+   <div><small>COMBO</small><strong id="combo">×1</strong></div>
+   <div><small>LIVES</small><strong id="lives" aria-label="3 lives">♥♥♥</strong></div>
+   <div><small>DISTANCE</small><strong id="distance">0 m</strong></div>
+   <button id="pause" aria-label="Pause" title="Pause (P / Esc)">Ⅱ</button>
+  </header>
+  <div id="trail-info"><span id="lead">🐼 Bubu · Q / Tab to swap</span><span id="hug" hidden>♡ Hug Mode</span></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <nav id="controls" aria-label="Runner controls">
+   <button data-action="left" aria-label="Move left">←</button>
+   <button data-action="right" aria-label="Move right">→</button>
+   <button data-action="jump">Jump ↑</button>
+   <button data-action="slide">Slide ↓</button>
+   <button data-action="swap">Swap ♡</button>
+  </nav>
+  <section id="overlay" aria-label="Game menu">
+   <div class="card">
+    <div class="eyebrow">A LITTLE PATH. A LOT OF LOVE.</div>
+    <h1 id="title">Lovely Lane <em>Dash</em></h1>
+    <p id="description">Two best friends. One lovely adventure.<br>Gather hearts and take turns leading the way.</p>
+    <div id="summary" hidden></div>
+    <button id="play" class="primary">Let’s run ♡</button>
+    <button id="menu" hidden>Menu</button>
+    <details id="help"><summary>How to Play</summary>
+     <p><b>A/D or ←/→:</b> lanes · <b>W/↑/Space:</b> jump · <b>S/↓:</b> slide · <b>Q/Tab:</b> swap · <b>P/Esc:</b> pause · <b>M:</b> mute.</p>
+     <p><b>🐼 Bubu:</b> press jump again for a double jump; hold to glide briefly. Fits through pink narrow fences. Dodge crates and cracked rocks.</p>
+     <p><b>🐻 Dudu:</b> one jump. Down + jump in the air ground-pounds; down fast-falls. Slide on the ground smashes crates and cracked rocks for bonus hearts.</p>
+     <p>Jump puddles and low fences; duck branches and arches; dodge thorns. Spring mushrooms launch you across short blue gaps. A hit costs one life, never a fight!</p>
+     <p>Hearts +10, honey +25. Consecutive hearts build up to ×5; missed hearts or hits reset the chain. Golden hearts give 5 seconds of Hug Mode: wider magnet, double points.</p>
+     <p><b>Touch:</b> swipe to move, jump or slide. Use Swap to change lead; hold Jump to glide. Taps do not count as swipes. The glowing heart trail suggests a safe route.</p>
+    </details>
+    <a href="index.html" class="back">← Back to Arcade</a>
+   </div>
+  </section>
+  <footer id="settings" aria-label="Sound settings">
+   <button id="mute" aria-pressed="false">Sound on</button>
+   <button id="voices" aria-pressed="true">Voices on</button>
+   <label>Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="0.35"></label>
+  </footer>
+  <p id="error" role="alert" hidden></p>
+ </main>
+ <script src="vendor/three.min.js"></script>
+ <script src="js/voices.js"></script>
+ <script src="js/dash/main.js"></script>
+ <!-- The existing builder expects SkyHop; alias only while loading it. -->
+ <script>window.SkyHop = window.Dash;</script>
+ <script src="js/skyhop/characters.js"></script>
+ <script>delete window.SkyHop;</script>
+ <script src="js/dash/chunks.js"></script>
+ <script src="js/dash/entities.js"></script>
+ <script src="js/dash/runner.js"></script>
+ <script src="js/dash/track.js"></script>
+ <script src="js/dash/input.js"></script>
+ <script src="js/dash/ui.js"></script>
+<script src="js/shared/chrome.js"></script>
+</body>
+</html>

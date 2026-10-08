@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Local character comparison</title>
+<style>body{font:16px system-ui;background:#eee7e3;color:#45282a}section{display:flex;flex-wrap:wrap;align-items:center;background:white;margin:20px;padding:15px;gap:16px}img{width:400px;height:400px;object-fit:contain}canvas{width:400px;height:400px}h2{width:100%}</style>
+<h1>Reference / original code-drawn artwork</h1>
+<p>Local test only. Serve the project root over HTTP to load the reference manifest. Reference sheets include multiple poses; canvas previews show the neutral front pose.</p>
+<div id="comparisons"></div>
+<script src="../js/characters.js"></script>
+<script>
+const R=CharacterRenderer;
+R.validateSprites();
+fetch('../model_references/manifest.json').then(r=>{if(!r.ok)throw Error('Manifest unavailable');return r.json();}).then(manifest=>{
+ for(const image of manifest.images){
+  const section=document.createElement('section'),title=document.createElement('h2'),ref=document.createElement('img');
+  title.textContent=image.path;ref.src='../model_references/'+image.path.split('/').map(encodeURIComponent).join('/');ref.alt=image.path;
+  section.append(title,ref);
+  for(const kind of image.characters){
+   const canvas=document.createElement('canvas');canvas.width=canvas.height=400;canvas.setAttribute('aria-label',kind+' '+image.view);const ctx=canvas.getContext('2d');
+   if(image.view==='pixel'){
+    const rows=R.PIXEL_SPRITES[kind],palette=R.getPixelPalette(kind),cell=15;
+    rows.forEach((row,y)=>[...row].forEach((key,x)=>{if(palette[key]){ctx.fillStyle=palette[key];ctx.fillRect(20+x*cell,20+y*cell,cell,cell);}}));
+   }else R.draw(ctx,200,125,kind,3.3,0,0,true);
+   section.append(canvas);
+  }
+  document.getElementById('comparisons').append(section);
+ }
+ document.body.dataset.ready='true';
+}).catch(error=>{document.body.append(document.createTextNode(error.message));console.error(error);});
+</script>

@@ -72,49 +72,19 @@ async function cdpTargets() {
     await send('Runtime.enable');
     await sleep(1500);
 
-    // Report what the renderer actually loaded, so a broken sprite is visible.
-    const info = await evaluate(`(() => {
-      const R = window.CharacterRenderer;
-      if (!R) return { error: 'CharacterRenderer missing' };
-      const out = { api: Object.keys(R) };
-      for (const k of ['bubu', 'dudu']) {
-        const rows = R.PIXEL_SPRITES[k];
-        out[k] = { rows: rows.length, widths: [...new Set(rows.map(r => r.length))] };
-      }
-      return out;
-    })()`);
-    console.log('renderer:', JSON.stringify(info));
-
-    // Drive the game into the pixel mode used for the screenshot.
-    const mode = await evaluate(`(() => {
-      const names = [...document.querySelectorAll('button, a')]
-        .map(n => (n.textContent || '').trim())
-        .filter(Boolean);
-      return names;
-    })()`);
-    console.log('controls:', JSON.stringify(mode));
-
-    const started = await evaluate(`(() => {
-      const btn = [...document.querySelectorAll('button, a')]
-        .find(n => /pixel picnic|together run/i.test(n.textContent || ''));
-      if (!btn) return 'no pixel mode button';
-      btn.click();
-      return 'clicked ' + (btn.textContent || '').trim();
-    })()`);
-    console.log('mode start:', started);
-    await sleep(1200);
-
-    // Press play so the characters are on screen rather than the menu.
-    await evaluate(`(() => {
-      const p = document.querySelector('.product-modal:not([hidden]) button');
-      if (p) { p.click(); return true; }
-      return false;
-    })()`);
-    await sleep(2500);
-
-    const shot = await send('Page.captureScreenshot', { format: 'png' });
-    fs.writeFileSync(OUT, Buffer.from(shot.data, 'base64'));
-    console.log('wrote', OUT);
+    const errors=[];
+    ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.method==='Runtime.exceptionThrown')errors.push(m.params.exceptionDetails.text);});
+    for(const mode of ['hub','catch','picnic','runner','hug']){
+      const url='file:///'+path.join(ROOT,mode==='hub'?'index.html':'arcade.html').replace(/\\/g,'/')+(mode==='hub'?'':'?mode='+(mode==='hug'?'catch':mode));
+      await send('Page.navigate',{url});await sleep(1000);
+      if(mode!=='hub')await evaluate(`(()=>{const button=[...document.querySelectorAll('button')].find(b=>/Got it/.test(b.textContent));if(button)button.click();ArcadeGame.launch();if(${JSON.stringify(mode)}==='hug')ArcadeGame.state.hug=100;})()`);
+      await sleep(200);
+      await evaluate('CharacterRenderer.validateSprites()');
+      const shot=await send('Page.captureScreenshot',{format:'png'});
+      fs.writeFileSync(path.join(__dirname,'character-'+mode+'.png'),Buffer.from(shot.data,'base64'));
+      console.log('PASS screenshot '+mode);
+    }
+    if(errors.length)throw Error(errors.join('\n'));
     ws.close();
   } catch (err) {
     console.error('FAILED:', err.message);

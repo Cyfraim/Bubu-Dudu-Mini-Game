@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8eee8">
+<title>Sweet Rescue · Bubu &amp; Dudu</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/rescue.css">
+<link rel="stylesheet" href="css/base.css">
+<script src="js/shared/settings.js"></script><script src="js/shared/modes.js"></script>
+</head>
+<body class="product-game">
+<main class="rescue-page">
+ <header><a href="index.html" class="back">← Back to Arcade</a><h1>✿ Sweet Rescue</h1><span class="subtitle">Little paws. Big teamwork.</span></header>
+ <section class="shell" aria-label="Sweet Rescue game">
+  <div id="hud" class="hud">
+   <button id="character" title="Swap (Space)"><canvas id="portrait" width="44" height="44" aria-hidden="true"></canvas><span id="character-name">Bubu · ⇄ Space</span></button>
+   <div><strong id="level-name">Lost Chick</strong><span id="delivered">0 / 1 friends home</span></div>
+   <div class="weather-stat"><label for="storm">Storm <span id="timer">0:00</span></label><progress id="storm" max="1" value="1"></progress></div>
+   <span id="hearts">♡ 0</span><button id="mute" aria-label="Mute sound" aria-pressed="false">♫</button><button id="pause" aria-label="Pause game">Ⅱ</button>
+  </div>
+  <div class="stage" id="stage">
+   <canvas id="garden" tabindex="0" aria-label="Garden rescue game. WASD or arrows move, Space swaps, hold E to rescue. Press P to pause."></canvas>
+   <div id="toast" role="status" class="toast" hidden></div>
+   <div id="overlay" class="overlay"><section id="panel" class="card" aria-label="Game menu"></section></div>
+  </div>
+  <div class="controls" id="controls">
+   <div id="joystick" role="group" aria-label="Touch movement joystick"><span id="stick">✿</span></div>
+   <p class="keyboard-hint">WASD / arrows · move<br>Space · swap &nbsp; Hold E · rescue<br>R · checkpoint &nbsp; P / Esc · pause &nbsp; M · mute</p>
+   <div class="actions"><button id="swap">⇄ Swap</button><button id="rescue">♡ Rescue</button><button id="checkpoint">✿ Return</button></div>
+  </div>
+ </section>
+ <p class="footer">A gentle storm, never a game over. Every little friend can still come home.</p>
+</main>
+<script src="js/characters.js"></script>
+<script src="js/voices.js"></script>
+<script src="js/rescue/main.js"></script>
+<script src="js/rescue/levels.js"></script>
+<script src="js/rescue/input.js"></script>
+<script src="js/rescue/entities.js"></script>
+<script src="js/rescue/player.js"></script>
+<script src="js/rescue/render.js"></script>
+<script src="js/rescue/ui.js"></script>
+<script>Rescue.boot();</script>
+<script src="js/shared/chrome.js"></script>
+</body>
+</html>

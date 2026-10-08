@@ -1,0 +1,16 @@
+(function(S){
+ 'use strict';
+ const C=S.CONFIG;S.near=[];S.grid=[];let cols=0,rows=0;
+ S.touch=function(x,y,r,o){return x+r>o.x&&x-r<o.x+o.w&&y+r>o.y&&y-r<o.y+o.h;};
+ S.solid=function(o,kind){return o.active&&(o.type==='fence'||o.type==='log'||o.type==='crate'||o.type==='rock'||o.type==='gate'&&!o.open||o.type==='gap'&&kind!=='bubu');};
+ S.rebuildGrid=function(){for(let i=0;i<S.grid.length;i++)S.grid[i].length=0;for(const o of S.obstacles){if(!o.active)continue;const x0=Math.max(0,Math.floor(o.x/C.gridSize)),x1=Math.min(cols-1,Math.floor((o.x+o.w)/C.gridSize)),y0=Math.max(0,Math.floor(o.y/C.gridSize)),y1=Math.min(rows-1,Math.floor((o.y+o.h)/C.gridSize));for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)S.grid[y*cols+x].push(o);}};
+ S.query=function(x,y,r){S.near.length=0;const x0=Math.max(0,Math.floor((x-r)/C.gridSize)),x1=Math.min(cols-1,Math.floor((x+r)/C.gridSize)),y0=Math.max(0,Math.floor((y-r)/C.gridSize)),y1=Math.min(rows-1,Math.floor((y+r)/C.gridSize));for(let y=y0;y<=y1;y++)for(let xx=x0;xx<=x1;xx++){const cell=S.grid[y*cols+xx];for(let j=0;j<cell.length;j++)if(S.near.indexOf(cell[j])<0)S.near.push(cell[j]);}return S.near;};
+ S.loadLevel=function(index){S.level=S.levels[index];S.friends=S.level.friends.map((f,i)=>Object.assign({status:'stranded',progress:0,phase:i*1.9,freed:!f.requires},f));S.obstacles=S.level.obstacles.map(o=>Object.assign({active:true,open:false,progress:0},o));S.checkpoints=S.level.checkpoints.map(c=>Object.assign({active:false},c));cols=Math.ceil(S.level.size.w/C.gridSize);rows=Math.ceil(S.level.size.h/C.gridSize);S.grid.length=0;for(let i=0;i<cols*rows;i++)S.grid.push([]);S.rebuildGrid();if(S.render)S.render.clear();};
+ S.canPlace=function(x,y,w,h,ignore,kind){if(x<0||y<0||x+w>S.level.size.w||y+h>S.level.size.h)return false;for(const o of S.obstacles)if(o!==ignore&&S.solid(o,kind||'dudu')&&x<o.x+o.w&&x+w>o.x&&y<o.y+o.h&&y+h>o.y)return false;return true;};
+ S.updateEntities=function(dt){const p=S.player;for(const o of S.obstacles){if(!o.active)continue;if(o.type==='rain'){o.x+=o.speed*dt;if(o.x>S.level.size.w)o.x=-o.w;else if(o.x+o.w<0)o.x=S.level.size.w;}if(o.type==='stone')o.pressed=S.touch(p.x,p.y,0,o)&&(!o.heavy||p.kind==='dudu')||S.touch(p.partner.x,p.partner.y,0,o)&&(!o.heavy||p.partner.kind==='dudu');if((o.type==='heart'||o.type==='honey')&&S.touch(p.x,p.y,C.radius,o)){o.active=false;if(o.type==='heart'){S.state.hearts++;S.state.score+=C.heartPoints;}else S.state.score+=C.honeyPoints;S.render.emit(p.x,p.y,'heart');S.audio.play('hug');}}
+  // Combine all stones before updating a gate: either side can hold it open.
+  for(const gate of S.obstacles)if(gate.type==='gate'){let pressed=false;for(const stone of S.obstacles)if(stone.type==='stone'&&stone.gate===gate.id&&stone.pressed)pressed=true;gate.open=pressed||S.touch(p.x,p.y,C.radius+4,gate);}
+  for(const cp of S.checkpoints)if(Math.hypot(p.x-cp.x,p.y-cp.y)<C.checkpointRange&&!cp.active){for(const other of S.checkpoints)other.active=false;cp.active=true;S.state.checkpoint.x=cp.x;S.state.checkpoint.y=cp.y;S.ui.toast('Flower checkpoint saved ♡');}
+  S.rebuildGrid();
+ };
+})(window.Rescue);

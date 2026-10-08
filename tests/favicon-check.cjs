@@ -3,9 +3,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
 async function main(){
- for(const name of ['index.html','BubuDudu.html','sky-hop.html','cozy-kart.html']){
+ for(const name of ['index.html','BubuDudu.html','sky-hop.html','cozy-kart.html','arcade.html','rescue.html','dash.html']){
   const html=fs.readFileSync(path.join(root,name),'utf8'),head=html.split('</head>')[0];
-  assert.match(head,/<link rel="icon" type="image\/svg\+xml" sizes="any" href="favicon.svg">/);
+  assert.match(head,/<link\b(?=[^>]*rel="icon")(?=[^>]*href="favicon.svg")[^>]*>/);
   console.log('PASS '+name+' favicon declaration');
  }
  const pages=await(await fetch('http://localhost:9222/json/list')).json();

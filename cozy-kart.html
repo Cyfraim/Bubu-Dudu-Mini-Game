@@ -4,9 +4,12 @@
  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
  <meta name="theme-color" content="#e6f1e8"><title>Bubu &amp; Dudu · Cozy Kart</title>
  <link rel="icon" type="image/svg+xml" sizes="any" href="favicon.svg">
- <link rel="stylesheet" href="css/base.css"><link rel="stylesheet" href="css/kart.css">
+ <link rel="stylesheet" href="css/kart.css">
+<link rel="stylesheet" href="css/base.css">
+<script src="js/shared/settings.js"></script><script src="js/shared/modes.js"></script>
 </head>
-<body class="kart-page">
+<body class="kart-page product-game">
+<div id="product-loading" class="product-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading garden...</div>
  <canvas id="world" aria-label="Cozy Kart 3D race. WASD or arrows to drive, Space to drift, E to use an item."></canvas>
  <header class="kart-hud hidden" id="hud">
   <div class="race-title"><b>COZY KART</b><span id="track-name"></span></div>
@@ -33,5 +36,6 @@
  <script src="js/kart/race.js"></script>
  <script src="js/kart/models.js"></script>
  <script src="js/kart/main.js"></script>
+<script src="js/shared/chrome.js"></script>
 </body>
 </html>

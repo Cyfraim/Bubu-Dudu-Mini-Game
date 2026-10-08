@@ -1,0 +1,53 @@
+/* Dependency-free Edge/CDP checks; open rescue.html on debugging port 9222. */
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+async function main(){
+ const pages=await(await fetch('http://localhost:9222/json/list')).json(),page=pages.find(p=>p.type==='page'&&p.url.includes('rescue.html'));assert(page,'Open rescue.html in Edge on port 9222');
+ const ws=new WebSocket(page.webSocketDebuggerUrl);await new Promise(r=>ws.addEventListener('open',r));let id=0;const pending=new Map(),errors=[];
+ ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')errors.push(JSON.stringify(m.params.exceptionDetails));});
+ const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));}),wait=ms=>new Promise(r=>setTimeout(r,ms));
+ async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;}
+ try{
+  await send('Runtime.enable');await send('Page.enable');await send('Page.reload');await wait(1000);
+  const result=await evaluate(`(()=>{
+   const S=Rescue,P=S.player,C=S.CONFIG,out=[],check=(v,m)=>{if(!v)throw Error(m);out.push(m);};
+   check(S.state.mode==='menu'&&S.levels.length===4&&CharacterRenderer.CHARACTER_STYLE,'file:// boot, four levels and shared artwork');
+   S.audio.play=()=>{};S.audio.unlock=()=>{};S.best={};check(!S.unlocked(1),'later levels initially locked');
+   const tick=(n=1)=>{for(let i=0;i<n;i++)S.update(.04);};
+   function walk(x,y){
+    const step=20,w=Math.ceil(S.level.size.w/step),h=Math.ceil(S.level.size.h/step),sx=Math.round(P.x/step),sy=Math.round(P.y/step),gx=Math.round(x/step),gy=Math.round(y/step),queue=[sy*w+sx],prev=new Int32Array(w*h);prev.fill(-2);prev[queue[0]]=-1;
+    const allowed=(xx,yy)=>{if(xx<C.radius||yy<C.radius||xx>S.level.size.w-C.radius||yy>S.level.size.h-C.radius)return false;return !S.obstacles.some(o=>o.active&&(S.solid(o,P.kind)||o.type==='thorn')&&S.touch(xx,yy,C.radius+2,o));};
+    let end=-1;for(let qi=0;qi<queue.length;qi++){const q=queue[qi],qx=q%w,qy=Math.floor(q/w);if(Math.hypot(qx*step-x,qy*step-y)<24){end=q;break;}for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=qx+d[0],ny=qy+d[1],n=ny*w+nx;if(nx<0||ny<0||nx>=w||ny>=h||prev[n]!==-2||!allowed(nx*step,ny*step))continue;prev[n]=q;queue.push(n);}}
+    if(end<0)throw Error('No route in '+S.level.name+' to '+x+','+y+' as '+P.kind);const route=[];for(let n=end;prev[n]>=0;n=prev[n])route.push(n);route.reverse();
+    for(const n of route){const tx=n%w*step,ty=Math.floor(n/w)*step;let guard=0;while(Math.hypot(P.x-tx,P.y-ty)>4){const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy);S.input.joyX=dx/d*.55;S.input.joyY=dy/d*.55;tick();if(S.state.mode==='complete'){S.input.clear();return;}if(++guard>200)throw Error('Movement stuck '+P.x+','+P.y+' toward '+tx+','+ty);} }S.input.clear();
+   }
+   function kind(k){if(P.kind!==k)P.swap();}
+   function navigate(x,y){const gate=S.obstacles.find(o=>o.type==='gate');if(gate&&((P.x<gate.x)!==(x<gate.x))){const stone=S.obstacles.find(o=>o.type==='stone'&&((o.x<gate.x)===(P.x<gate.x)));walk(stone.x+stone.w/2,stone.y+stone.h/2);kind('dudu');tick();P.swap();tick();walk(gate.x+(P.x<gate.x?70:-55),gate.y+gate.h/2);}const gap=S.obstacles.find(o=>o.type==='gap');if(gap&&((P.x<gap.x)!==(x<gap.x))){kind('bubu');walk(gap.x+(P.x<gap.x?-45:65),gap.y+gap.h/2);walk(gap.x+(P.x<gap.x?65:-45),gap.y+gap.h/2);}walk(x,y);}
+   for(let level=0;level<4;level++)for(const initial of ['bubu','dudu']){
+    if(level)S.best[level-1]={stars:1};S.start(level);kind(initial);
+    for(const f of S.friends){navigate(f.x,f.y);kind(f.requires==='branch'?'dudu':f.requires==='bush'?'bubu':P.kind);S.input.action=true;document.getElementById('rescue').click();tick(30);check(f.status==='following','level '+(level+1)+' '+initial+' frees '+f.name);navigate(S.level.safeHouse.x,S.level.safeHouse.y);tick();check(f.status==='delivered','level '+(level+1)+' '+initial+' delivers '+f.name);}
+    check(S.state.mode==='complete'&&S.state.delivered===S.friends.length,'level '+(level+1)+' completes starting as '+initial);check(S.best[level].stars>=1&&Number.isFinite(S.best[level].time),'stars / time saved for level '+(level+1));
+   }
+   S.start(0);walk(570,260);document.getElementById('rescue').click();tick(30);const f=S.friends[0];check(P.trail.length===1,'tap rescue builds trail');const x=P.x,y=P.y;P.swap();check(P.x===x&&P.y===y&&P.trail[0]===f&&P.partner.kind==='bubu','instant mid-level swap preserves trail');
+   walk(260,200);tick();check(S.state.checkpoint.x===260,'flower checkpoint activates');S.returnCheckpoint();check(f.status==='stranded'&&Math.abs(f.x-260)<=28&&P.x===260,'checkpoint return safely drops friends');
+   S.start(0);P.x=300;P.y=450;tick(55);P.x=440;P.y=450;P.cooldown=0;P.trail.push(S.friends[0]);S.friends[0].status='following';tick();check(P.x<400&&P.cooldown>0&&P.trail.length===0&&S.friends[0].status==='stranded','thorn bump rewinds two seconds and returns friends to checkpoint');
+   S.start(1);P.x=245;P.y=300;kind('dudu');const log=S.obstacles.find(o=>o.type==='log'),old=log.x;S.input.joyX=1;tick(30);S.input.clear();check(log.x>old,'Dudu pushes logs');
+   S.start(2);const rock=S.obstacles.find(o=>o.type==='rock');P.x=rock.x-20;P.y=rock.y+30;kind('dudu');document.getElementById('rescue').click();tick(30);check(!rock.active,'Dudu breaks cracked rocks');
+   S.start(3);const crate=S.obstacles.find(o=>o.type==='crate');P.x=crate.x-20;P.y=crate.y+30;kind('dudu');const oldCrate=crate.x;S.input.joyX=1;tick(25);S.input.clear();check(crate.x>oldCrate,'Dudu pushes crates');const heart=S.obstacles.find(o=>o.type==='heart');P.x=heart.x;P.y=heart.y;tick();check(S.state.hearts===1,'bonus hearts collected');
+   S.start(0);P.x=350;P.y=330;kind('dudu');S.input.joyX=1;const a=P.x;tick(10);const slow=P.x-a;S.input.clear();S.start(0);P.x=350;P.y=330;S.input.joyX=1;const b=P.x;tick(10);check(P.x-b>slow,'Bubu hops puddles while Dudu slows');S.input.clear();
+   S.pause();const time=S.state.time;tick(20);check(S.state.time===time&&S.input.x===0,'pause freezes time and clears held inputs');S.pause();S.state.time=S.level.timer+1;P.x=S.level.safeHouse.x;P.y=S.level.safeHouse.y;S.friends[0].status='following';S.friends[0].x=P.x;S.friends[0].y=P.y;P.trail.push(S.friends[0]);tick();check(S.state.stars===1,'late completion still succeeds with one star');
+   S.start(0);S.state.time=1;P.trail.push(S.friends[0]);S.friends[0].status='following';S.friends[0].x=P.x;S.friends[0].y=P.y;tick();check(S.state.stars===3,'early no-loss completion earns three stars');
+   S.start(0);S.state.time=S.level.timer*.8;P.trail.push(S.friends[0]);S.friends[0].status='following';S.friends[0].x=P.x;S.friends[0].y=P.y;tick();check(S.state.stars===2,'on-time completion earns two stars');
+   check(JSON.parse(localStorage.getItem('sweetRescueBest'))[3].stars>=1,'progress persisted in localStorage');S.start(0);return out;
+  })()`);console.log(result.map(x=>'PASS '+x).join('\n'));
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'d',code:'KeyD'});await wait(180);assert(await evaluate('Rescue.player.x>150'),'real keyboard movement');await send('Input.dispatchKeyEvent',{type:'keyUp',key:'d',code:'KeyD'});
+  await evaluate('document.getElementById("swap").focus()');let before=await evaluate('Rescue.player.kind');await send('Input.dispatchKeyEvent',{type:'keyDown',key:' ',code:'Space'});assert.equal(await evaluate('Rescue.player.kind'),before,'shortcut ignored with button focused');await send('Input.dispatchKeyEvent',{type:'keyUp',key:' ',code:'Space'});await evaluate('document.getElementById("garden").focus()');before=await evaluate('Rescue.player.kind');await send('Input.dispatchKeyEvent',{type:'keyDown',key:' ',code:'Space'});assert.notEqual(await evaluate('Rescue.player.kind'),before,'real keyboard swap');await send('Input.dispatchKeyEvent',{type:'keyUp',key:' ',code:'Space'});console.log('PASS real keyboard movement / swap and focused-button shortcut safety');
+  await send('Emulation.setDeviceMetricsOverride',{width:360,height:800,deviceScaleFactor:3,mobile:true});await send('Emulation.setTouchEmulationEnabled',{enabled:true});await wait(200);
+  const layout=await evaluate(`(()=>{const ids=['hud','controls','stage','swap','rescue','checkpoint','pause'];return {fit:ids.every(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.left>=0&&r.right<=360&&r.bottom<=800}),targets:['swap','rescue','checkpoint','pause'].every(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.width>=44&&r.height>=44}),dpr:Rescue.render.dpr,joy:(()=>{const r=document.getElementById('joystick').getBoundingClientRect();return{x:r.x+r.width*.8,y:r.y+r.height/2}})()}})()`);assert(layout.fit&&layout.targets&&layout.dpr===3,'360px layout and target sizes');
+  await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...layout.joy,id:1}]});await wait(100);assert(await evaluate('Rescue.input.joyX>0'),'touch joystick');await evaluate('Rescue.pause()');assert(await evaluate('Rescue.input.joyX===0'),'pause releases joystick capture');await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await evaluate('Rescue.pause()');
+  const shot=await send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(__dirname,'rescue-mobile.png'),Buffer.from(shot.data,'base64'));console.log('PASS 360px layout, 44px targets, DPR 3, real touch joystick and pause release');
+  const pos=await evaluate('[Rescue.player.x,Rescue.player.y]');await send('Emulation.setDeviceMetricsOverride',{width:800,height:360,deviceScaleFactor:1,mobile:true});await wait(100);assert(await evaluate('Rescue.render.width>600'),'landscape canvas resize');assert(await evaluate(`Math.hypot(Rescue.player.x-${pos[0]},Rescue.player.y-${pos[1]})<1`),'resize does not teleport player');
+  await send('Page.navigate',{url:page.url.replace('rescue.html','index.html')});await wait(800);assert(await evaluate(`!!document.querySelector('a[href="rescue.html"]')&&document.querySelectorAll('.mode-card').length===ArcadeModes.length`));assert.equal(errors.length,0,errors.join('\n'));console.log('PASS landscape resize, shared hub and no browser exceptions');
+ }finally{ws.close();}
+}
+main().catch(e=>{console.error(e);process.exitCode=1;});

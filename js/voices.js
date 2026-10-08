@@ -126,7 +126,8 @@ window.VoiceManager = (function () {
   }
 
   // Restore saved preference
-  try { _voicesOn = localStorage.getItem(LS_KEY) !== 'false'; } catch {}
+  if(window.ArcadeSettings){ArcadeSettings.subscribe(s=>{_voicesOn=s.voices;setMuted(s.muted);setVolume(s.volume);updateVoiceUI();});}
+  else try { _voicesOn = localStorage.getItem(LS_KEY) !== 'false'; } catch {}
 
   // ── AudioContext handoff from main page ──────────────────────────
   function setAudioContext(ctx) { _ctx = ctx; }
@@ -431,7 +432,8 @@ function _preload(event) {
   function toggle() {
     _voicesOn = !_voicesOn;
     if (!_voicesOn) stop();
-    try { localStorage.setItem(LS_KEY, String(_voicesOn)); } catch {}
+    if(window.ArcadeSettings)ArcadeSettings.set({voices:_voicesOn});
+    else try { localStorage.setItem(LS_KEY, String(_voicesOn)); } catch {}
     updateVoiceUI();
   }
 

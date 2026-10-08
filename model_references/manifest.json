@@ -1,0 +1,50 @@
+{
+  "images": [
+    {
+      "path": "normal/Bubu and Dudu 2D.jpg",
+      "characters": [
+        "bubu",
+        "dudu"
+      ],
+      "view": "sheet"
+    },
+    {
+      "path": "normal/Bubu and Dudu 3D.jpg",
+      "characters": [
+        "bubu",
+        "dudu"
+      ],
+      "view": "sheet"
+    },
+    {
+      "path": "normal/Bubu Top, Side Left, Side Right, Back.jpg",
+      "characters": "bubu",
+      "view": "sheet"
+    },
+    {
+      "path": "normal/Bubu.jpg",
+      "characters": "bubu",
+      "view": "sticker"
+    },
+    {
+      "path": "normal/Dudu Top, Side Left, Side Right, Back.jpg",
+      "characters": "dudu",
+      "view": "sheet"
+    },
+    {
+      "path": "normal/Dudu.jpg",
+      "characters": "dudu",
+      "view": "sticker"
+    },
+    {
+      "path": "pixel/bubu.jpg",
+      "characters": "bubu",
+      "view": "pixel"
+    },
+    {
+      "path": "pixel/dudu.jpg",
+      "characters": "dudu",
+      "view": "pixel"
+    }
+  ]
+}

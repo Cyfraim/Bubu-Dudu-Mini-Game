@@ -1,0 +1,8 @@
+/* One settings record, shared across the hub and every game. */
+(function(){'use strict';
+ const KEY='bubuDuduSettings',listeners=new Set(),state={muted:false,voices:true,volume:.35};
+ function read(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&typeof s==='object'){state.muted=s.muted===true;state.voices=s.voices!==false;state.volume=Number.isFinite(s.volume)?Math.max(0,Math.min(1,s.volume)):.35;}else{state.voices=localStorage.getItem('bubuVoicesEnabled')!=='false';const old=JSON.parse(localStorage.getItem('lovelyDashSettings'));if(old){state.muted=!!old.muted;state.voices=old.voices!==false;state.volume=Number.isFinite(old.volume)?Math.max(0,Math.min(1,old.volume)):.35;}}}catch(e){}}
+ function set(patch){let changed=false;for(const k of ['muted','voices','volume']){if(!(k in patch))continue;const value=k==='volume'?(Number.isFinite(patch[k])?Math.max(0,Math.min(1,patch[k])):state.volume):!!patch[k];if(state[k]!==value){state[k]=value;changed=true;}}if(!changed)return;try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}listeners.forEach(fn=>fn(state));}
+ read();window.ArcadeSettings={KEY,state,set,subscribe(fn){listeners.add(fn);fn(state);return()=>listeners.delete(fn);},bind(object,key,setting=key){if(!object)return;Object.defineProperty(object,key,{configurable:true,enumerable:true,get(){return state[setting];},set(value){set({[setting]:value});}});}};
+ addEventListener('storage',function(e){if(e.key!==KEY)return;read();listeners.forEach(fn=>fn(state));});
+})();

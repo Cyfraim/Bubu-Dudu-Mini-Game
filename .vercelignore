@@ -8,6 +8,8 @@
 .env.*
 node_modules/
 tests/
+model_references/
+docs/
 test-results/
 playwright-report/
 coverage/
